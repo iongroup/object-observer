@@ -78,7 +78,7 @@ const
 			}
 		}
 	},
-	propertiesBluePrint = { observe: { value: observe }, unobserve: { value: unobserve } },
+	propertiesBluePrint = { observe: { value: observe }, unobserve: { value: unobserve }, _isProxyObject_: { value: true } },
 	prepareObject = (source, oMeta) => {
 		const target = Object.defineProperties({}, propertiesBluePrint);
 		target[oMetaKey] = oMeta;

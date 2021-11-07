@@ -1,6 +1,14 @@
 {
 	"name": "object-observer",
-	"version": "4.4.1-snapshot",
+	"version": "1.0.0",
+	"publishConfig": {
+		"registry": "http://pinexus01.iontrading.com/nexus/repository/npm-private/"
+	},	
+	"main": "dist/object-observer.min.js",
+	"browser": "dist/object-observer.min.js",
+	"files": [
+		"dist"
+	],
 	"description": "object-observer utility provides simple means to (deeply) observe specified object/array changes; implemented via native Proxy; changes delivered in a synchronous way",
 	"keywords": [
 		"object",
@@ -17,36 +25,10 @@
 		"javascript",
 		"proxy"
 	],
-	"homepage": "https://github.com/gullerya/object-observer",
-	"bugs": {
-		"url": "https://github.com/gullerya/object-observer/issues",
-		"email": "gullerya@gmail.com"
-	},
-	"license": "ISC",
-	"files": [
-		"dist"
-	],
-	"main": "dist/object-observer.min.js",
-	"browser": "dist/object-observer.min.js",
-	"type": "module",
-	"author": {
-		"name": "Yuri Guller",
-		"email": "gullerya@gmail.com"
-	},
-	"funding": [
-		{
-			"url": "https://paypal.me/gullerya?locale.x=en_US"
-		},
-		{
-			"url": "https://tidelift.com/funding/github/npm/object-observer"
-		}
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/gullerya/object-observer"
-	},
 	"scripts": {
-		"build": "node ./ci/tools/build-utils.js",
+		"build": "rollup src/object-observer.js --file dist/object-observer.js --format umd --name object-observer.js",
+		"minify": "terser --output dist/object-observer.min.js  --compress --mangle -- dist/object-observer.js",
+		"build-prod": "npm run build && npm run minify",
 		"lint": "eslint -c ./ci/.eslintrc.json ./src/*.js ./tests/*.js ./ci/**/*.js",
 		"test": "node ./node_modules/just-test/dist/tests-runner/run-tests.js --config=./tests/tests-runner-config.json",
 		"bump": "node ./ci/tools/version-utils.js"
@@ -56,6 +38,7 @@
 		"fs-extra": "^10.0.0",
 		"just-test": "2.3.2",
 		"puppeteer": "^11.0.0",
-		"uglify-js": "^3.14.3"
+		"rollup": "^2.59.0",
+		"rollup-plugin-terser": "^7.0.2"
 	}
 }
