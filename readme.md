@@ -1,4 +1,4 @@
-[![npm](https://img.shields.io/npm/v/object-observer.svg?label=npm%20object-observer)](https://www.npmjs.com/package/object-observer)
+[![npm](https://img.shields.io/npm/v/@gullerya/object-observer.svg?label=npm)](https://www.npmjs.com/package/@gullerya/object-observer)
 [![GitHub](https://img.shields.io/github/license/gullerya/object-observer.svg)](https://github.com/gullerya/object-observer)
 
 [![Quality pipeline](https://github.com/gullerya/object-observer/workflows/Quality%20pipeline/badge.svg?branch=main)](https://github.com/gullerya/object-observer/actions?query=workflow%3A%22Quality+pipeline%22)
@@ -6,6 +6,8 @@
 [![Codacy](https://img.shields.io/codacy/grade/a3879d7077eb4eef83a591733ad7c579.svg?logo=codacy)](https://www.codacy.com/app/gullerya/object-observer)
 
 # `object-observer`
+
+Starting with `6.0.0` this package will be relocated to [@gullerya/object-observer](https://www.npmjs.com/package/@gullerya/object-observer), please follow up there.
 
 __`object-observer`__ provides a deep observation of a changes performed on an object/array graph.
 
@@ -16,6 +18,7 @@ Main aspects and features:
 - changes delivered in a __synchronous__ way by default, __asynchronous__ delivery is optionally available as per `Observable` configuration; [more details here](docs/sync-async.md)
 - observed path may optionally be filtered as per `observer` configuration; [more details here](docs/filter-paths.md)
 - original objects are __cloned__ while turned into `Observable`s
+  - circular references are nullified in the clone
 - __array__ specifics:
   - generic object-like mutations supported
   - intrinsic `Array` mutation methods supported: `pop`, `push`, `shift`, `unshift`, `reverse`, `sort`, `fill`, `splice`, `copyWithin`
@@ -25,9 +28,14 @@ Main aspects and features:
   - intrinsic `TypedArray` mutation methods supported: `reverse`, `sort`, `fill`, `set`, `copyWithin`
   - massive mutations delivered in a single callback, usually having an array of an atomic changes
 - intrinsic mutation methods of `Map`, `WeakMap`, `Set`, `WeakSet` (`set`, `delete`) etc __are not__ observed (see this [issue](https://github.com/gullerya/object-observer/issues/1) for more details)
-- following host objects (and their extensions) are __skipped__ from cloning / turning into observables: `Date`, `Blob`, `Error`
+- following host objects (and their extensions) are __skipped__ from cloning / turning into observables: `Date`
 
-Supported: ![CHROME](docs/browser-icons/chrome.png)<sub>61+</sub> | ![FIREFOX](docs/browser-icons/firefox.png)<sub>60+</sub> | ![EDGE](docs/browser-icons/edge.png)<sub>16+</sub> | ![NODE JS](docs/browser-icons/nodejs.png) <sub>8.10.0+</sub>
+Supported:
+![CHROME](docs/browser-icons/chrome.png)<sub>71+</sub> |
+![FIREFOX](docs/browser-icons/firefox.png)<sub>65+</sub> |
+![EDGE](docs/browser-icons/edge-chromium.png)<sub>79+</sub> |
+![SAFARI](docs/browser-icons/safari-ios.png)<sub>12.1</sub> |
+![NODE JS](docs/browser-icons/nodejs.png) <sub>12.0.0+</sub>
 
 Performance report can be found [here](docs/performance-report.md).
 
@@ -41,17 +49,25 @@ For a preview/playground you are welcome to:
 
 ## Install
 
-Use regular `npm install object-observer --save-prod` to use the library from your local environment:
+Use regular `npm install @gullerya/object-observer --save-prod` to use the library from your local environment.
+
+__ES__ module:
 ```js
-import { Observable } from 'node_modules/object-observer/dist/object-observer.min.js';
+import { Observable } from '@gullerya/object-observer';
 ```
 
-Alternatively, a __CDN__ deployment available (AWS driven), so one can import it directly:
+__CJS__ flavor:
+```js
+const { Observable } = require('@gullerya/object-observer');
+```
+> Huge thanks to [seidelmartin](https://github.com/seidelmartin) providing the CJS build while greatly improving the build code overall along the way!
+
+__CDN__ (most suggested, when possible):
 ```js
 import { Observable } from 'https://libs.gullerya.com/object-observer/x.y.z/object-observer.min.js';
 ```
 
-> Note: replace the `x.y.z` with the desired version, one of the listed in the [changelog](docs/changelog.md).
+> Replace the `x.y.z` with the desired version, one of the listed in the [changelog](docs/changelog.md).
 
 CDN features:
 - security:
@@ -67,14 +83,12 @@ Full details about CDN usage and example are [found here](docs/cdn.md).
 
 Library implements `Observable` API as it is defined [here](docs/observable.md).
 
-Additionally, from version 4.2.0 there is also 'DOM-like' API flavor - constructable `ObjectObserver`.
+There is also a 'DOM-like' API flavor - constructable `ObjectObserver`.
 This API is resonating with DOM's `MutationObserver`, `ResizeObserver` etc from the syntax perspective.
 Under the hood it uses the same `Observable` mechanics.
 Read docs about this API flavor [here](docs/dom-like-api.md).
 
-> This is __experimental__ API until specified otherwise.
-
-Starting from 4.3.x `object-observer` is cross-instance operable.
+`object-observer` is cross-instance operable.
 Observables created by different instances of the library will still be detected correctly as such and handled correctly by any of the instances.
 
 ## Security
@@ -90,7 +104,7 @@ const
     order = { type: 'book', pid: 102, ammount: 5, remark: 'remove me' },
     observableOrder = Observable.from(order);
 
-observableOrder.observe(changes => {
+Observable.observe(observableOrder, changes => {
     changes.forEach(change => {
         console.log(change);
     });
@@ -128,7 +142,7 @@ Object.assign(observableOrder, { amount: 1, remark: 'less is more' }, { async: t
 let a = [ 1, 2, 3, 4, 5 ],
     observableA = Observable.from(a);
 
-observableA.observe(changes => {
+Observable.observe(observableA, changes => {
     changes.forEach(change => {
         console.log(change);
     });
@@ -220,15 +234,15 @@ let user = {
 //  path
 //
 //  going to observe ONLY the changes of 'firstName'
-oUser.observe(callback, {path: 'firstName'});
+Observable.observe(oUser, callback, {path: 'firstName'});
 
 //  going to observe ONLY the changes of 'address.city'
-oUser.observe(callback, {path: 'address.city'});
+Observable.observe(oUser, callback, {path: 'address.city'});
 
 //  pathsOf
 //
 //  going to observe the changes of 'address' own properties ('city', 'block') but not else
-oUser.observe(callback, {pathsOf: 'address'});
+Observable.observe(oUser, callback, {pathsOf: 'address'});
 //  here we'll be notified on changes of
 //    address.city
 //    address.extra
@@ -236,7 +250,7 @@ oUser.observe(callback, {pathsOf: 'address'});
 //  pathsFrom
 //
 //  going to observe the changes from 'address' and deeper
-oUser.observe(callback, {pathsFrom: 'address'});
+Observable.observe(oUser, callback, {pathsFrom: 'address'});
 //  here we'll be notified on changes of
 //    address
 //    address.city

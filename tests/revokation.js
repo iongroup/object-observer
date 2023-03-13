@@ -1,9 +1,10 @@
-import { getSuite } from '../../node_modules/just-test/dist/just-test.js';
-import { Observable } from '../../src/object-observer.js';
+import { assert } from 'chai';
+import { getSuite } from 'just-test/suite';
+import { Observable } from '../src/object-observer.js';
 
-const suite = getSuite({ name: 'Testing revokation of removed/replaced objects' });
+const suite = getSuite('Testing revokation of removed/replaced objects');
 
-suite.runTest({ name: 'test revokation of replaced objects - simple set' }, () => {
+suite.test('test revokation of replaced objects - simple set', () => {
 	const og = Observable.from({
 		a: {
 			b: {
@@ -12,20 +13,17 @@ suite.runTest({ name: 'test revokation of replaced objects - simple set' }, () =
 			prop: 'text'
 		}
 	});
-	let eventsCollector = [];
+	let events = [];
 
-	og.observe(changes => {
-		eventsCollector = eventsCollector.concat(changes);
-		if (changes.length !== 1 || changes[0].type !== 'update') throw new Error('expected to track one update change');
-		if (changes[0].oldValue.prop !== 'text') throw new Error('expected the old value to still be readable');
-		if (changes[0].value.prop !== 'text') throw new Error('expected the new value to be readable');
-	});
+	Observable.observe(og, changes => events.push(...changes));
 
 	og.a = og.a.b;
-	if (og.a.prop !== 'text') throw new Error('expected the new value on the observed graph to be accessible');
+	assert.strictEqual(og.a.prop, 'text');
+	assert.equal(events.length, 1);
+	assert.deepStrictEqual(events[0], { type: 'update', path: ['a'], value: { prop: 'text' }, oldValue: { b: { prop: 'text' }, prop: 'text' }, object: og });
 });
 
-suite.runTest({ name: 'test revokation of replaced objects - splice in array' }, () => {
+suite.test('test revokation of replaced objects - splice in array', () => {
 	const og = Observable.from([
 		{
 			child: {
@@ -34,15 +32,12 @@ suite.runTest({ name: 'test revokation of replaced objects - splice in array' },
 			prop: 'text'
 		}
 	]);
-	let eventsCollector = [];
+	let events = [];
 
-	og.observe(changes => {
-		eventsCollector = eventsCollector.concat(changes);
-		if (changes.length !== 1 || changes[0].type !== 'update') throw new Error('expected to track one update change');
-		if (changes[0].oldValue.prop !== 'text') throw new Error('expected the old value to still be readable');
-		if (changes[0].value.prop !== 'text') throw new Error('expected the new value to be readable');
-	});
+	Observable.observe(og, changes => events.push(...changes));
 
 	og.splice(0, 1, og[0].child);
-	if (og[0].prop !== 'text') throw new Error('expected the new value on the observed graph to be accessible');
+	assert.strictEqual(og[0].prop, 'text');
+	assert.strictEqual(events.length, 1);
+	assert.deepStrictEqual(events[0], { type: 'update', path: [0], value: { prop: 'text' }, oldValue: { child: { prop: 'text' }, prop: 'text' }, object: og });
 });

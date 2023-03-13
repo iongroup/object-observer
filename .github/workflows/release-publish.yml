@@ -1,4 +1,4 @@
-name: Release
+name: Publish (NPM)
 
 on:
   push:
@@ -6,56 +6,41 @@ on:
       - v*
 
 jobs:
-  release:
-    runs-on: ubuntu-18.04
+  publish:
+    runs-on: ubuntu-20.04
+    outputs:
+      packageVersion: ${{ steps.outputVersion.outputs.packageVersion }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.OO_CI_AT }}
 
-      - name: Setup NodeJS 14
-        uses: actions/setup-node@v2
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
-          registry-url: 'https://registry.npmjs.org'
+          node-version-file: '.nvmrc'
+          registry-url: "https://registry.npmjs.org"
 
-      # Prepare
-      - name: Install NPM
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build
-        run: npm run build -- --cdn
+        run: npm run build
 
-      # Publish to NPM
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: npm publish
 
-      # Deploy to CDN (trigger)
-      - name: Obtain release version
-        run: echo "RELEASE_VERSION=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
-      - name: Tirgger deploy to CDN
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: Deploy to CDN
-          token: ${{ secrets.OO_CI_AT }}
-          inputs: '{ "version": "${{ env.RELEASE_VERSION }}" }'
+      - name: Output version
+        id: outputVersion
+        run: echo "packageVersion=$(cat package.json | jq -r '.version')" >> $GITHUB_OUTPUT
 
-      # Bump version to next snapshot
-      - name: Bump snapshot version
-        run: |
-          npm run bump -- --version=patch --snapshot
-          npm install
-          echo "SNAPSHOT_VERSION=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
-
-      - name: Push changes
-        run: |
-          git fetch
-          git config user.email "gullerya@gmail.com"
-          git config user.name "CI automation"
-          git add --all
-          git commit -m "set version to ${{ env.SNAPSHOT_VERSION }}"
-          git push origin HEAD:main
+  trigger-cdn-deploy:
+    needs: publish
+    uses: ./.github/workflows/release-deploy.yml
+    with:
+      version: ${{ needs.publish.outputs.packageVersion }}
+    secrets: inherit

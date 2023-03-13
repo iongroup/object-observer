@@ -4,11 +4,6 @@
 	"publishConfig": {
 		"registry": "http://pinexus01.iontrading.com/nexus/repository/npm-private/"
 	},	
-	"main": "dist/object-observer.min.js",
-	"browser": "dist/object-observer.min.js",
-	"files": [
-		"dist"
-	],
 	"description": "object-observer utility provides simple means to (deeply) observe specified object/array changes; implemented via native Proxy; changes delivered in a synchronous way",
 	"keywords": [
 		"object",
@@ -23,22 +18,66 @@
 		"tree",
 		"graph",
 		"javascript",
-		"proxy"
+		"proxy",
+		"C",
+		"J",
+		"G",
+		"Y"
+	],
+	"author": {
+		"name": "Yuri Guller",
+		"email": "gullerya@gmail.com"
+	},
+	"homepage": "https://github.com/gullerya/object-observer",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/gullerya/object-observer"
+	},
+	"bugs": {
+		"url": "https://github.com/gullerya/object-observer/issues",
+		"email": "gullerya@gmail.com"
+	},
+	"license": "ISC",
+	"funding": [
+		{
+			"url": "https://paypal.me/gullerya?locale.x=en_US"
+		},
+		{
+			"url": "https://tidelift.com/funding/github/npm/object-observer"
+		}
+	],
+	"type": "module",
+	"main": "./dist/object-observer.min.js",
+	"module": "./dist/object-observer.min.js",
+	"browser": "./dist/object-observer.min.js",
+	"types": "./dist/object-observer.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/object-observer.min.js",
+			"require": "./dist/cjs/object-observer.min.cjs"
+		}
+	},
+	"files": [
+		"dist",
+		"sri.json"
 	],
 	"scripts": {
 		"build": "rollup src/object-observer.js --file dist/object-observer.js --format umd --name object-observer.js",
 		"minify": "terser --output dist/object-observer.min.js  --compress --mangle -- dist/object-observer.js",
 		"build-prod": "npm run build && npm run minify",
 		"lint": "eslint -c ./ci/.eslintrc.json ./src/*.js ./tests/*.js ./ci/**/*.js",
-		"test": "node ./node_modules/just-test/dist/tests-runner/run-tests.js --config=./tests/tests-runner-config.json",
-		"bump": "node ./ci/tools/version-utils.js"
+		"test": "node node_modules/just-test/bin/local-runner.js config_file=./tests/configs/tests-config-ci-node.json",
+		"version": "npm run build && git add --all",
+		"postversion": "git push && git push --tags"
 	},
 	"devDependencies": {
-		"eslint": "^8.2.0",
 		"fs-extra": "^10.0.0",
-		"just-test": "2.3.2",
 		"puppeteer": "^11.0.0",
 		"rollup": "^2.59.0",
-		"rollup-plugin-terser": "^7.0.2"
+		"rollup-plugin-terser": "^7.0.2",
+		"chai": "4.3.6",
+		"eslint": "^8.35.0",
+		"just-test": "^3.0.4",
+		"esbuild": "^0.17.10"
 	}
 }

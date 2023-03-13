@@ -7,18 +7,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.3] - 2023-03-01
+### BREAKING CHANGE
+### Chore
+- moved deployment to the scoped NPM package `@gullerya/object-observer`
+
+## [5.1.7] - 2023-03-01
+### Fixed
+- [Issue no. 129](https://github.com/gullerya/object-observer/issues/129) - graceful handling of the circular referenced inputs
+### Chore
+- updated performance data on NodeJS
+- upgraded dependencies
+
+## [5.1.6] - 2022-09-25
+### Chore
+- upgraded dependencies
+
+## [5.1.5] - 2022-09-14
+### Chore
+- reduced dependencies (via reworking build flow)
+- improved CI
+
+## [5.1.0] - 2022-09-07
+### Added
+- [Issue no. 121](https://github.com/gullerya/object-observer/issues/121) - added commonjs module build
+### Chore
+- upgraded dependencies
+
+## [5.0.4] - 2022-07-02
+### Chore
+- upgraded dependencies
+- [Issue no. 86](https://github.com/gullerya/object-observer/issues/86) - moved to the new JustTest testing framework
+
+## [5.0.2] - 2022-05-09
+### Chore
+- upgraded dependencies
+
+## [5.0.0] - 2022-02-16
+### Changed (breaking change)
+- [Issue no. 113](https://github.com/gullerya/object-observer/issues/113) - removed `observable`'s `observe` and `unobserve` in favor of the static counterparts from `Observable` namespace.
+
+## [4.8.0] - 2022-02-12
+### Added
+- [Issue no. 111](https://github.com/gullerya/object-observer/issues/111) - Added `observe` and `unobserve` methods as statics on the `Observable`. Those methods will be removed from the next major release (5) from the observable instance and only be available from `Observable` namespace.
+### Chore
+- upgraded dependencies
+
+
+## [4.7.2] - 2021-12-25
+### Fixed
+- [Issue no. 106](https://github.com/gullerya/object-observer/issues/106) - Fixed TS definition of ChangeType (enum to type)
+- [Issue no. 107](https://github.com/gullerya/object-observer/issues/107) - Fixed TS definition of ObjectObserver.observe (options are optional)
+
+## [4.7.1] - 2021-12-22
+### Fixed
+- [Issue no. 104](https://github.com/gullerya/object-observer/issues/104) - Fixed TS definitions
+
+## [4.7.0] - 2021-12-18
+### Added
+- [Issue no. 102](https://github.com/gullerya/object-observer/issues/102) - Added TS definitions for convenience
+
+## [4.6.6] - 2021-12-18
+### Chore
+- [Issue no. 99](https://github.com/gullerya/object-observer/issues/99) - simplified CD flow
+
+## [4.6.0] - 2021-11-19
+### Changed
+- [Issue no. 97](https://github.com/gullerya/object-observer/issues/97) - removing the care for native objects, any but `Date`, due to seemingly non-relevancy (until proven otherwise); this effectively un-does issue #2
+
+## [4.5.0] - 2021-11-13
+### Fixed
+- [Issue no. 53](https://github.com/gullerya/object-observer/issues/53) - fixing failures on NodeJS due to `Blob` unavailability on global scope
+
 ## [4.4.0] - 2021-11-07
 ### Fixed
 - [Issue no. 93](https://github.com/gullerya/object-observer/issues/93) - `pathsOf` misbehave fixed
+### Chore
 - dependencies updated
 - performance tuned up
 
 ## [4.3.2] - 2021-07-19
-### Fixed
+### Chore
 - dependencies updated
 
 ## [4.3.1] - 2021-06-15
-### Fixed
+### Chore
 - dependencies updated
 
 ## [4.3.0] - 2021-05-03
@@ -33,14 +106,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.2.2] - 2021-04-23
 ### Added
 - [Issue no. 77](https://github.com/gullerya/object-observer/issues/77) - manual CI trigger for release
-### Changed
+### Chore
 - documentation improved and updated
 - dependencies updated
 
 ## [4.2.1] - 2021-03-15
 ### Added
 - [Issue no. 73](https://github.com/gullerya/object-observer/issues/73) - added DOM-like API of `ObjectObserver`
-### Changed
+### Chore
 - documentation improved and updated
 - dependencies updated
 
@@ -123,91 +196,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.4.2] - 2019-10-10
 ### Fixed
 - minor improvenent in the CI part of the library due to newer/better version of the test runner
-
-
----
-# Historical releases
-
-* __2.4.1__
-  * fixed [Issue no. 27](https://github.com/gullerya/object-observer/issues/27) - broken `NodeJS` dedicated distro
-  * updated dependencies
-
-* __2.3.0__
-  * fixed [Issue no. 26](https://github.com/gullerya/object-observer/issues/26) - callbacks/observers are being called with an empty changes array when set for a specific path/paths
-
-* __2.2.0__
-  * implemented [Issue no. 25](https://github.com/gullerya/object-observer/issues/25) - not dispathing events when strictly equal values reassigned (except `object`, which is never equal due to cloning)
-
-* __2.1.0__
-  * implemented [Issue no. 21](https://github.com/gullerya/object-observer/issues/21) - implemented 'partial paths observation' functionality (thanks [tonis2](https://github.com/tonis2)!)
-
-* __2.0.2__
-  * fixed [Issue no. 20](https://github.com/gullerya/object-observer/issues/20) - fixing `isObservable` API
-
-* __2.0.0__
-  * implemented [Issue no. 16](https://github.com/gullerya/object-observer/issues/16) - explicit naming in export instead of default (!!! breaking change)
-  * implemented [Issue no. 17](https://github.com/gullerya/object-observer/issues/17) - removed non-ES6 like module and adjusted folder structure (!!! breaking change)
-
-* __1.2.0__
-  * fixed [Issue no. 18](https://github.com/gullerya/object-observer/issues/18)
-
-* __1.1.5__
-  * implemented improvement as suggested in [Issue no. 13](https://github.com/gullerya/object-observer/issues/13)
-  * added tests to CI + coverage report
-
-* __1.1.4__
-  * added `object` property to the `Change` pointing the the immediate subject of change; [Issue no. 12](https://github.com/gullerya/object-observer/issues/12). Attention: this change is found only in ES6-module flavor distribution.
-
-* __1.1.3__
-  * added `Observable.isObservable` API
-
-- __1.1.2__
-  - hardening APIs + adding tests
-  - improving documentation
-
-- __1.1.1__
-  - even more aggressive performance tightening
-  - performance tests added to the test suites
-
-- __1.1.0__
-  - `reverse`/`shuffle` change events provided with a `path` (see this [enhancement proposal](https://github.com/gullerya/object-observer/issues/10))
-  - further performance improvements
-
-- __1.0.6__
-  - Performance improvements (plain objects for events, WeakMap instead of Map wherever possible, other tightens)
-  - Minor fixes on `1.0.4` and `1.0.5`
-
-- __1.0.3__
-  - Fixed [Issue no. 9](https://github.com/gullerya/object-observer/issues/9) - incorrect tail array items indexing/pathing after performing `splice` which inserts new items in the middle of array
-
-- __1.0.2__
-  - Removed named export, only a default export/import is available (see docs below)
-
-- __1.0.1__
-  - Added ES6 module packaging (both regular and minified)
-
-- __0.2.6__
-  - Fixed cloning logic to allow observability for host objects like `DOMStringMap` and alike (gave up on calling the original object's constructor)
-  - Documentation fixes
-
-- __0.2.5__
-  - Fix: [issue #8](https://github.com/gullerya/object-observer/issues/8) - incorrect `oldValue` supplied in `update`/`delete` events when handling inner object/s sub-graph
-
-- __0.2.4__
-  - Minor syntactic fixes
-
-- __0.2.3__
-  - Fix: correct handling of removal/replacement of the non-observable objects (issues [this](https://github.com/gullerya/object-observer/issues/4) and [this](https://github.com/gullerya/object-observer-js/issues/3))
-
-- __0.2.2__
-  - Fix: Switched internal implementation to use `Map` instead of `WeakMap` object, due to this [issue](https://github.com/Microsoft/ChakraCore/issues/2419) in Edge browsers. Once the Edge will be fixed, I'll switch back to 'weak' maps.
-
-- __0.2.1__
-  - Bug fix: implemented 'non-observable' object types functionality for the ones, that their observation is meaningless (or even harmful and bug causing); 'non-observables' are: `Date`, `Blob`, `Number`, `String`, `Boolean`, `Error`, `SyntaxError`, `TypeError`, `URIError`, `Function`, `Promise`, `RegExp` (see this [issue](https://github.com/gullerya/object-observer-js/issues/2) for more details)
-
-- __0.2.0__
-  - Tech: moved proxy implementation to revokable
-  - Tech: refactored algorithm of sub-graphs indexing and management; speed and memory improved, arrays massive changes improved significantly
-  - API: added revokability to an Observable
-  - 'detached' (`pop`, `shift`, `splice` actions on arrays) and replaced (simple update on objects and arrays, `fill` on arrays) observed sub-graphs are being revoked as well
-  - results of 'detach' actions (`pop`, `shift`, `splice`) are turned back to the plain object (yet having all of the changes done to the observable) when returned by APIs

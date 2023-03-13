@@ -1,63 +1,100 @@
-﻿import os from 'os';
-import fs from 'fs';
-import path from 'path';
-import process from 'process';
-import uglify from 'uglify-js';
-import { updateIntegrity } from './integrity-utils.js';
+﻿import path from 'node:path';
+import fs from 'node:fs/promises';
 
-const
-	isCDN = process.argv.some(a => a === '--cdn'),
-	SRC = 'src',
-	DIST = 'dist',
-	CDN = 'cdn',
-	filesToCopy = ['object-observer.js'],
-	filesToMinify = ['object-observer.js'];
+import esbuild from 'esbuild';
 
-process.stdout.write(`\x1B[32mStarting the build...\x1B[0m${os.EOL}`);
-process.stdout.write(os.EOL);
+import { calcIntegrity } from './integrity-utils.js';
+import * as stdout from './stdout.js';
 
-ensureCleanDir(DIST);
+const SRC_DIR = 'src';
+const DIST_DIR = 'dist';
 
-process.stdout.write(`\tcopying "${SRC}" to "${DIST}"...`);
-for (const fileToCopy of filesToCopy) {
-	fs.copyFileSync(path.join(SRC, fileToCopy), path.join(DIST, fileToCopy));
-}
-process.stdout.write(`\t\x1B[32mOK\x1B[0m${os.EOL}`);
+stdout.writeGreen('Starting the build...');
+stdout.writeNewline();
+stdout.writeNewline();
 
-process.stdout.write('\tminifying...');
-const options = {
-	toplevel: true
-};
-for (const fileToMinify of filesToMinify) {
-	const fp = path.join(DIST, fileToMinify);
-	const mfp = path.join(DIST, fileToMinify.replace(/\.js$/, '.min.js'));
-	const fc = fs.readFileSync(fp, { encoding: 'utf8' });
-	const mfc = uglify.minify(fc, options).code;
-	fs.writeFileSync(mfp, mfc);
-}
-process.stdout.write(`\t\t\t\x1B[32mOK\x1B[0m${os.EOL}`);
-
-if (isCDN) {
-	buildCDNDistro(DIST, CDN);
-	updateIntegrity(path.join(DIST, CDN));
+try {
+	await cleanDistDir();
+	await buildESModule();
+	await buildCJSModule();
+	await buildCDNResources();
+} catch (e) {
+	console.error(e);
 }
 
-process.stdout.write(os.EOL);
-process.stdout.write(`\x1B[32mDONE\x1B[0m${os.EOL}`);
+stdout.writeGreen('... build done');
+stdout.writeNewline();
+stdout.writeNewline();
 
-function ensureCleanDir(dir) {
-	process.stdout.write(`\tcleaning "${dir}"...`);
-	fs.rmSync(dir, { recursive: true, force: true });
-	fs.mkdirSync(dir);
-	process.stdout.write(`\t\t\x1B[32mOK\x1B[0m${os.EOL}`);
+async function cleanDistDir() {
+	stdout.write(`\tcleaning "dist"...`);
+
+	await fs.rm(DIST_DIR, { recursive: true, force: true });
+	await fs.mkdir(DIST_DIR);
+
+	stdout.writeGreen('\tOK');
+	stdout.writeNewline();
 }
 
-function buildCDNDistro(dir, cdn) {
-	process.stdout.write('\tbuilding CDN resources...');
-	fs.mkdirSync(path.join(dir, cdn), { recursive: true });
-	for (const file of filesToMinify) {
-		fs.copyFileSync(path.join(dir, file), path.join(dir, cdn, file));
-		fs.copyFileSync(path.join(dir, file.replace('.js', '.min.js')), path.join(dir, cdn, file.replace('.js', '.min.js')));
+async function buildESModule() {
+	stdout.write('\tbuilding ESM resources...');
+
+	await fs.copyFile(path.join(SRC_DIR, 'object-observer.d.ts'), path.join(DIST_DIR, 'object-observer.d.ts'));
+	await fs.copyFile(path.join(SRC_DIR, 'object-observer.js'), path.join(DIST_DIR, 'object-observer.js'));
+	await esbuild.build({
+		entryPoints: [path.join(DIST_DIR, 'object-observer.js')],
+		outdir: DIST_DIR,
+		minify: true,
+		sourcemap: true,
+		sourcesContent: false,
+		outExtension: { '.js': '.min.js' }
+	});
+
+	stdout.writeGreen('\tOK');
+	stdout.writeNewline();
+}
+
+async function buildCJSModule() {
+	stdout.write('\tbuilding CJS resources...');
+
+	const baseConfig = {
+		entryPoints: [path.join(SRC_DIR, 'object-observer.js')],
+		outdir: path.join(DIST_DIR, 'cjs'),
+		format: 'cjs',
+		outExtension: { '.js': '.cjs' }
+	};
+	await esbuild.build(baseConfig);
+	await esbuild.build({
+		...baseConfig,
+		entryPoints: [path.join(DIST_DIR, 'cjs', 'object-observer.cjs')],
+		minify: true,
+		sourcemap: true,
+		sourcesContent: false,
+		outExtension: { '.js': '.min.cjs' }
+	});
+
+	stdout.writeGreen('\tOK');
+	stdout.writeNewline();
+}
+
+async function buildCDNResources() {
+	stdout.write('\tbuilding CDN resources...');
+
+	const CDN_DIR = path.join(DIST_DIR, 'cdn');
+
+	await fs.mkdir(CDN_DIR);
+
+	const files = (await fs.readdir(DIST_DIR))
+		.filter(file => file.endsWith('.js') || file.endsWith('.map'));
+
+	for (const file of files) {
+		await fs.copyFile(path.join(DIST_DIR, file), path.join(CDN_DIR, file));
 	}
-	process.stdout.write(`\t\x1B[32mOK\x1B[0m${os.EOL}`);
+
+	const sriMap = await calcIntegrity(CDN_DIR);
+
+	await fs.writeFile('sri.json', JSON.stringify(sriMap, null, '\t'), { encoding: 'utf-8' });
+
+	stdout.writeGreen('\tOK');
+	stdout.writeNewline();
 }

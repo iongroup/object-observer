@@ -1,32 +1,39 @@
-name: Deploy to CDN
+name: Deploy (CDN)
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy'
+        description: "Version to deploy (eg 1.2.3)"
         required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
 
 jobs:
   release-deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
-      - name: Setup NodeJS 14
-        uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version-file: '.nvmrc'
 
-      # Get release version
-      - name: Get release version
-        run: echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-
+      # Pull the object-observer version to be deployed
       - name: Install
-        run: npm install -E object-observer@${{ env.RELEASE_VERSION }}
+        run: npm install -E @gullerya/object-observer@${{ inputs.version }}
 
       # Deploy
       - name: Deploy
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET }}
-        run: aws s3 sync ./node_modules/object-observer/dist/cdn s3://${{ secrets.AWS_LIBS_BUCKET }}/object-observer/${{ env.RELEASE_VERSION }} --delete --cache-control public,max-age=172800,immutable
+          AWS_REGION: eu-central-1
+        run: aws s3 sync ./node_modules/@gullerya/object-observer/dist/cdn s3://${{ secrets.AWS_LIBS_BUCKET }}/object-observer/${{ inputs.version }} --delete --cache-control public,max-age=172800,immutable
