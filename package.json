@@ -1,9 +1,6 @@
 {
-	"name": "object-observer",
-	"version": "1.0.0",
-	"publishConfig": {
-		"registry": "http://pinexus01.iontrading.com/nexus/repository/npm-private/"
-	},	
+	"name": "@ionweb/object-observer",
+	"version": "1.0.0-ion",
 	"description": "object-observer utility provides simple means to (deeply) observe specified object/array changes; implemented via native Proxy; changes delivered in a synchronous way",
 	"keywords": [
 		"object",
